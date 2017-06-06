@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mpv "${1}"
+
+search=https://www.youtube.com/watch?v=za52aubNof8

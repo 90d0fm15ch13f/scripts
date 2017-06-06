@@ -1,0 +1,47 @@
+#!/bin/bash
+prog=${0##*/}
+
+# Check the arguments first.
+
+if [ "$#" -lt "2" ]
+then
+    echo "usage: $prog viewer [viewer options] file" >&2
+    exit 1
+fi
+
+# Separate the arguments.  Assume the first is the viewer, the last is
+# the file, and all in between are options to the viewer.
+
+viewer="$1"
+shift
+
+while [ "$#" -gt "1" ]
+do
+    options="$options $1"
+    shift
+done
+
+file=$1
+
+# Create a temporary directory for our copy of the temporary file.
+#
+# This is more secure than creating a temporary file in an existing
+# directory.
+
+tmpdir=/tmp/$LOGNAME$$
+umask 077
+mkdir "$tmpdir" || exit 1
+tmpfile="$tmpdir/${file##*/}"
+
+# Copy mutt's temporary file to our temporary directory so that we can
+# let mutt overwrite and delete it when we exit.
+
+cp "$file" "$tmpfile"
+
+# Run the viewer in the background and delete the temporary files when done. 
+
+(
+    "$viewer" $options "$tmpfile"
+    rm -f "$tmpfile"
+    rmdir "$tmpdir"
+) &
